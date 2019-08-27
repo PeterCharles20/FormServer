@@ -7,12 +7,14 @@ import { FormComponent } from './form/form.component';
 import { NgXformModule } from '@esss/ng-xform';
 import { SortComponent } from './sort/sort.component';
 import { AppRoutingModule } from './app-routing.module';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     FormComponent,
-    SortComponent
+    SortComponent,
+    DashboardComponent
   ],
   imports: [
     BrowserModule,
