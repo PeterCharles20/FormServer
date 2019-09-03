@@ -61,41 +61,51 @@ export class SortComponent implements OnInit {
      * Then it is added into the Survey
      */
     public sortSurvey(): void {
-        this.createSurvey(); // init survey
-
-        let tempAssessment: Assessment; // Create a temporary
-        let i = 0; // Iterates through the tab view
-        let j = 0; // Iterates through the assessment choices
 
         this.tabTitle = this.tabViews[0].tabViewLabel;
 
-        for (i; i < this.tabViews.length; i++) {
-            tempAssessment = this.createAssessment(i); // Create a new assessment
-            if (this.tabViews[i].assessmentType.toString() === '4') {
-                tempAssessment.addChoice(this.createChoice(i, 4)); // Add a single choice to an assessment
-            } else if (this.tabViews[i].assessmentType.toString() === '5') {
-                j = i; // index of the choice
-                while (this.tabViews[j].assessmentId === this.tabViews[i].assessmentId) {
-                    tempAssessment.addChoice(this.createChoice(j, 5)); // Add a single a choice to an assessment
-                    j++;
+        this.createSurvey(); // Create an instance of a survey
+
+        let tempAssessment: Assessment; // Create an instance of an assessment
+        let cPos = 0; // Holds position of choices
+        let aPos = 0; // Holds position of assessment
+
+        this.tabViews.forEach((item, index, array) => {
+            if (index === 0) { // Default statement
+                tempAssessment = this.createAssessment(index); // Create a new assessment
+                this.survey.addAssessment(tempAssessment);
+                if (item.assessmentType.toString() === '4') {
+                    this.survey.assessments[aPos].addChoice(this.createChoice(index, 4)); // Add a single choice to an assessment
+                } else if (item.assessmentType.toString() === '5') {
+                    this.survey.assessments[aPos].addChoice(this.createChoice(cPos, 5)); // Add a single a choice to an assessment
+                    cPos++; // Update the position of the choice
                 }
-                i = j; // Update new position of i
+            } else if (item.assessmentType.toString() === '4') {
+                tempAssessment = this.createAssessment(index); // Create a new assessment
+                tempAssessment.addChoice(this.createChoice(index, 4)); // Add a single choice to an assessment
+                this.survey.addAssessment(tempAssessment);
+                aPos++; // Update the position of the assessment
+            } else if (item.assessmentType.toString() === '5' && item.assessmentId === this.tabViews[index - 1].assessmentId) {
+                this.survey.assessments[aPos].addChoice(this.createChoice(index, 5)); // Add a single a choice to an assessment
+                cPos++; // Update the position of the choice
+            } else if (item.assessmentType.toString() === '5' && item.assessmentId !== this.tabViews[index - 1].assessmentId) {
+                cPos = 0; // Reset the position of the choice
+                tempAssessment = this.createAssessment(index); // Create a new assessment
+                tempAssessment.addChoice(this.createChoice(index, 5)); // Add a single a choice to an assessment
+                this.survey.addAssessment(tempAssessment); // Add the assessment to the survey
+                aPos++; // Update the position of the assessment
             }
-            console.log(tempAssessment);
-            this.survey.addAssessment(tempAssessment); // Add the assessment to the survey
-        }
+        });
     }
 
     /**
      * Creates a new choice based on the assessment type
      * @param i
      * Index of the array
-     * @type
      * The assessment type
      */
     public createChoice(i: number, type: number): Choice {
         let tempChoices: Choice; // Create temp choice
-        /** Creates a default choice*/
         if (type === 4) {
             tempChoices = new Choice(
                 4,
@@ -103,10 +113,9 @@ export class SortComponent implements OnInit {
             );
             return tempChoices;
         } else {
-            /** Creates a normal choice*/
             tempChoices = new Choice(
                 this.tabViews[i].choiceId,
-                this.tabViews[i].choiceLabel
+                this.tabViews[i].choiceDescription.trim()
             );
         }
         return tempChoices;
@@ -130,7 +139,7 @@ export class SortComponent implements OnInit {
         const tempAssessment = new Assessment(
             this.tabViews[i].assessmentId,
             this.tabViews[i].assessmentType,
-            this.tabViews[i].assessmentLabel.trim()
+            this.tabViews[i].assessmentDescription.trim()
         );
         return tempAssessment;
     }

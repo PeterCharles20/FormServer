@@ -50,12 +50,12 @@ export class FormComponent implements OnInit, OnDestroy {
   public model: any;
   public outputhelper = {A: 1, B: 2, C: 3};
   public subscriptions: Subscription[] = [];
+  public editing = true;
 
   constructor(
         private titleService: Title,
         private http: HttpClient
-  )
-  {}
+  ) {}
 
   ngOnInit() {
     const minDate = new Date();
@@ -100,7 +100,7 @@ export class FormComponent implements OnInit, OnDestroy {
       let i = 0;
       for (i; i < this.survey.assessments.length; i++) {
           if (this.survey.assessments[i].asessmentType.toString() === '5') {
-              this.createRadioGroup(i);
+              // this.createRadioGroup(i);
               this.createSelect(i);
           } else {
               this.createText(i);
@@ -241,6 +241,7 @@ export class FormComponent implements OnInit, OnDestroy {
 
   public onSubmit(values: object) {
     this.model = values;
-    console.log(this.model);
+    const payload = JSON.stringify(this.model);
+    console.log(payload);
   }
 }
