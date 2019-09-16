@@ -25,18 +25,9 @@ export class Survey {
    * @param tabDesc
    * The tabview description
    */
-  constructor(tabId: number, tabDesc: string) {
+  constructor(tabId: number, tabDesc: string, assessments: Assessment []) {
     this.tabId = tabId;
     this.tabDesc = tabDesc;
-    this.assessments = new Array(); // Creates an instance of an array
-  }
-
-  /**
-   * Pushes an assessment into the assessment array
-   * @param assessment
-   * A tabview assessment
-   */
-  public addAssessment(assessment: Assessment) {
-    this.assessments.push(assessment);
+    this.assessments = assessments;
   }
 }

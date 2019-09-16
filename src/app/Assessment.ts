@@ -35,31 +35,10 @@ export class Assessment {
      * @param assessmentDesc
      * The description of an Assessment
      */
-    constructor(id: number, assessmentType: number, assessmentDesc: string) {
+    constructor(id: number, assessmentType: number, assessmentDesc: string, choices: Choice[]) {
         this.id = id;
         this.asessmentType = assessmentType;
         this.assessmentDesc = assessmentDesc;
-        this.choices = new Array(); // Create an instance of an array
-    }
-
-    /**
-     * Pushes a new choice to the end of the choice array
-     * @param choice
-     * The Choice of an assessment
-     */
-    addChoice(choice: Choice): void {
-        this.choices.push(new Choice(
-            choice.id,
-            choice.choiceDesc
-        ));
-    }
-
-    /**
-     * Sets the Assessment's description
-     * @param description
-     * Description of the assessment
-     */
-    setAssessmentDescription(description: string): void {
-        this.assessmentDesc = description;
+        this.choices = choices;
     }
 }
