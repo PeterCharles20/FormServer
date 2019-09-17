@@ -3,8 +3,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {MessageService} from './message.service';
 import {Observable, of} from 'rxjs';
 import {catchError, tap} from 'rxjs/operators';
-import {TabView} from '../TabView';
-import { Survey } from '../Survey';
+
 
 const httpOptions = {
     headers: new HttpHeaders({'Content-Type': 'application/json'})
@@ -21,7 +20,7 @@ export class SurveyService {
   // private drupalURL = 'http://qadrupal.lan.sesahs.nsw.gov.au/rest/tab/list?_format=json';
  // private tabViewURL = 'http://qadrupal.lan.sesahs.nsw.gov.au/rest/content/tab/get/';
 
-  private tabViewURL = 'http://192.168.1.137:81/';
+  private tabViewURL = 'http://192.168.1.138:81/';
 
   constructor(
     private http: HttpClient,
@@ -33,12 +32,12 @@ export class SurveyService {
    * @param ID
    * GET request to druapl using the entityId associated with the tab view
    */
-  getTabView(ID: number): Observable<String> {
+  getTabView(ID: number): Observable<string> {
     const url = `${this.tabViewURL}${ID}${'?_format=json'}`;
-    return this.http.get<String>(url)
+    return this.http.get<string>(url)
       .pipe(
         tap(_ => this.log('fetched survey')),
-        catchError(this.handleError<String>('getTabViewList', ))
+        catchError(this.handleError<string>('getTabViewList', ))
       );
   }
 
