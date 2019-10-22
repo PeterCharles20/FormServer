@@ -6,39 +6,16 @@ import {Choice} from './Choice';
  * This format has been defined within Drupal, so that once Survey has been converted into a JSON string
  * It can match the data in Drupal
  */
-export class Assessment {
-    /**
-     * The ID of an assessment
-     * Used to identify with assessment ID stored in drupa
-     */
-    id: number;
-    /**
-     * Stores the assessment type
-     */
-    asessmentType: number;
-    /**
-     * Stores the description of an assessment
-     */
-    assessmentDesc: string;
-    /**
-     * Stores an array of choices
-     * These choices are the options of an assessment
-     */
-    choices: Choice[];
-
-    /**
-     * Constructor for Assessment Class
-     * @param id
-     * The Assessment ID
-     * @param assessmentType
-     * The Assessment Type
-     * @param assessmentDesc
-     * The description of an Assessment
-     */
-    constructor(id: number, assessmentType: number, assessmentDesc: string, choices: Choice[]) {
-        this.id = id;
-        this.asessmentType = assessmentType;
-        this.assessmentDesc = assessmentDesc;
-        this.choices = choices;
-    }
+export interface Assessment {
+    assessmentId: string;
+    assessmentVid: string;
+    assessmentLabel: string;
+    assessmentDescription: string;
+    assessmentType: string;
+    assessmentCode: string;
+    assessmentUuid: string;
+    assessmentDelta: string;
+    assessmentRequired: string;
+    assessmentDisplayType: string;
+    assessmentChoices: Choice[];
 }

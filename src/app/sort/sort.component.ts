@@ -29,7 +29,7 @@ export class SortComponent implements OnInit {
 
     private tabTitle: string;
 
-    surveyS;
+    private str: any;
 
   constructor(
       private http: HttpClient,
@@ -52,7 +52,7 @@ export class SortComponent implements OnInit {
     public getTabView() {
         this.formService.getTabView(this.id)
             .subscribe(
-                data => this.surveyS = data, // Move data into TabView
+                data => this.str = data, // Move data into TabView
                 err => console.log(err), // Log any Errors
                 () => this.sortSurvey()); // Sort tabviews into a Survey
     }
@@ -64,10 +64,10 @@ export class SortComponent implements OnInit {
      * Then it is added into the Survey
      */
     public sortSurvey(): void {
-        let json = JSON.stringify(eval("(" + this.surveyS + ")"));
-
-        this.survey = JSON.parse(json);
-        this.tabTitle = this.survey.tabDesc;
+        const json = JSON.parse(this.str);
+        eval(json);
+        this.survey = json;
+        this.tabTitle = this.survey.tabViewLabel;
 
     }
 
