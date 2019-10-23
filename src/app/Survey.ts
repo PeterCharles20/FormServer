@@ -4,6 +4,7 @@ import {Assessment} from './Assessment';
  * Contains all the assessments and choices that have been imported from Drupal
  * The format of this class has been defined in Drupal, so that it can easily be converted into a JSON string
  * And update the corresponding data in Drupal
+ * @author Peter Charles Sims
  */
 export interface Survey {
     // The label of a tab-view

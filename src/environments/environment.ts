@@ -5,6 +5,7 @@
 export const environment = {
   production: false,
     formServerURL: 'http://mysite.com/',
+    submitSurveyURL: 'http://mysite.com/form-data',
 };
 
 /*

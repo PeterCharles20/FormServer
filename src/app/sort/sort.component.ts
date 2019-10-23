@@ -12,6 +12,9 @@ import {ActivatedRoute} from '@angular/router';
   templateUrl: './sort.component.html',
   styleUrls: ['./sort.component.css'],
 })
+/**
+ * @author Peter Charles Sims
+ */
 export class SortComponent implements OnInit {
 
     /**
@@ -68,6 +71,10 @@ export class SortComponent implements OnInit {
         eval(json);
         this.survey = json;
         this.tabTitle = this.survey.tabViewLabel;
+
+    }
+
+    public submitSurvey(payload: string) {
 
     }
 

@@ -17,6 +17,8 @@ import {ActivatedRoute, RouterModule} from '@angular/router';
 import {Survey} from '../Survey';
 
 import {delay} from 'rxjs/operators';
+import {SurveyService} from "../_services/survey.service";
+
 
 @Component({
   selector: 'app-form',
@@ -29,6 +31,10 @@ import {delay} from 'rxjs/operators';
     imports: [NgXformModule, RouterModule],
   bootstrap: [AppComponent]
 })
+/**
+ * Class the displays the form
+ * @author Peter Charles Sims
+ */
 export class FormComponent implements OnInit, OnDestroy {
 
   @ViewChild(NgXformEditSaveComponent) xformComponent: NgXformEditSaveComponent;
@@ -50,7 +56,8 @@ export class FormComponent implements OnInit, OnDestroy {
 
   constructor(
         private titleService: Title,
-        private http: HttpClient
+        private http: HttpClient,
+        private surveyService: SurveyService
   ) {}
 
   ngOnInit() {
@@ -315,7 +322,17 @@ export class FormComponent implements OnInit, OnDestroy {
   public onSubmit(values: object) {
     this.model = values;
     const payload = JSON.stringify(this.model);
-    console.log(payload);
+    this.submitForm(payload);
+  }
+
+  public submitForm(payload: string) {
+      this.surveyService
+          .submitSurvey(payload) // Add the survey
+          .subscribe(
+              res => {
+                  console.log(res);
+              }
+          );
   }
 
     public checkValidation(optional: string) {

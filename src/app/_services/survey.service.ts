@@ -14,14 +14,11 @@ const httpOptions = {
 @Injectable({
   providedIn: 'root'
 })
-
+/**
+ * Service class
+ * @author Peter Charles Sims
+ */
 export class SurveyService {
-  //
-  // private surveysURL = 'http://qadrupal.lan.sesahs.nsw.gov.au/tabview/edit';
-  // private drupalURL = 'http://qadrupal.lan.sesahs.nsw.gov.au/rest/tab/list?_format=json';
- // private tabViewURL = 'http://qadrupal.lan.sesahs.nsw.gov.au/rest/content/tab/get/';
-
-  private tabViewURL = 'mysite.com/';
 
   constructor(
     private http: HttpClient,
@@ -41,6 +38,17 @@ export class SurveyService {
               catchError(this.handleError<string>('getTabViewList', ))
           );
   }
+
+    submitSurvey(payload: string): Observable<any> {
+        console.log(payload);
+        const url = `${environment.submitSurveyURL}`;
+        return this.http
+            .post<string>(url, payload, httpOptions)
+            .pipe(
+                tap(_ => this.log(`Deployed Survey`)),
+                catchError(this.handleError<any>('addSurvey', payload))
+            );
+    }
 
   /**
    * Handle Http operation that failed.
