@@ -3,7 +3,8 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {MessageService} from './message.service';
 import {Observable, of} from 'rxjs';
 import {catchError, tap} from 'rxjs/operators';
-import {TabView} from '../TabView';
+import {environment} from "../../environments/environment";
+
 
 const httpOptions = {
     headers: new HttpHeaders({'Content-Type': 'application/json'})
@@ -13,33 +14,41 @@ const httpOptions = {
 @Injectable({
   providedIn: 'root'
 })
-
+/**
+ * Service class
+ * @author Peter Charles Sims
+ */
 export class SurveyService {
-  //
-  // private surveysURL = 'http://qadrupal.lan.sesahs.nsw.gov.au/tabview/edit';
-  // private drupalURL = 'http://qadrupal.lan.sesahs.nsw.gov.au/rest/tab/list?_format=json';
-  private tabViewURL = 'http://qadrupal.lan.sesahs.nsw.gov.au/rest/content/tab/get/';
-
-  // private tabViewURL = 'http://192.168.1.120/rest/content/tab/get/';
 
   constructor(
     private http: HttpClient,
     private messageService: MessageService
   ) { }
-
+//
   /**
    * Returns tab view and the questions from the tab view
    * @param ID
    * GET request to druapl using the entityId associated with the tab view
    */
-  getTabView(ID: number): Observable<TabView[]> {
-    const url = `${this.tabViewURL}${ID}/${'?_format=json'}`;
-    return this.http.get<TabView[]>(url)
-      .pipe(
-        tap(_ => this.log('fetched tabViews')),
-        catchError(this.handleError<TabView[]>('getTabViewList', []))
-      );
+  getTabView(ID: number): Observable<string> {
+      const url = `${environment.formServerURL}${ID}/${'?_format=json'}`;
+      return this.http.get<string>(url)
+          .pipe(
+              tap(_ => this.log('fetched tabViews')),
+              catchError(this.handleError<string>('getTabViewList', ))
+          );
   }
+
+    submitSurvey(payload: string): Observable<any> {
+        console.log(payload);
+        const url = `${environment.submitSurveyURL}`;
+        return this.http
+            .post<string>(url, payload, httpOptions)
+            .pipe(
+                tap(_ => this.log(`Deployed Survey`)),
+                catchError(this.handleError<any>('addSurvey', payload))
+            );
+    }
 
   /**
    * Handle Http operation that failed.

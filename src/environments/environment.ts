@@ -3,7 +3,9 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+    formServerURL: 'http://mysite.com/',
+    submitSurveyURL: 'http://mysite.com/form-data',
 };
 
 /*

@@ -1,10 +1,8 @@
 import {Component, Input, NgModule, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {AppComponent} from '../app.component';
 import {
-    CheckboxField, CustomField, DateField, DateRangeField,
+    CheckboxField,
     DynamicField,
-    MeasureField, MultilineField,
-    NestedFormGroup,
     NgXformEditSaveComponent,
     NgXformModule, NumberField, RadioGroupField,
     SelectField,
@@ -14,13 +12,13 @@ import {Observable, of, Subject, Subscription} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
 import {Title} from '@angular/platform-browser';
 import {Validators} from '@angular/forms';
-import {TabView} from '../TabView';
+
 import {ActivatedRoute, RouterModule} from '@angular/router';
 import {Survey} from '../Survey';
-import {SurveyService} from '../_services/survey.service';
-import {Assessment} from '../Assessment';
-import {Choice} from '../Choice';
+
 import {delay} from 'rxjs/operators';
+import {SurveyService} from "../_services/survey.service";
+
 
 @Component({
   selector: 'app-form',
@@ -33,6 +31,10 @@ import {delay} from 'rxjs/operators';
     imports: [NgXformModule, RouterModule],
   bootstrap: [AppComponent]
 })
+/**
+ * Class the displays the form
+ * @author Peter Charles Sims
+ */
 export class FormComponent implements OnInit, OnDestroy {
 
   @ViewChild(NgXformEditSaveComponent) xformComponent: NgXformEditSaveComponent;
@@ -46,16 +48,17 @@ export class FormComponent implements OnInit, OnDestroy {
 
   public fields: DynamicField[];
   public horizontal = false;
-  public labelWidth = 2;
+  public labelWidth = 1000;
   public model: any;
   public outputhelper = {A: 1, B: 2, C: 3};
   public subscriptions: Subscription[] = [];
+  public editing = true;
 
   constructor(
         private titleService: Title,
-        private http: HttpClient
-  )
-  {}
+        private http: HttpClient,
+        private surveyService: SurveyService
+  ) {}
 
   ngOnInit() {
     const minDate = new Date();
@@ -97,13 +100,27 @@ export class FormComponent implements OnInit, OnDestroy {
           })
       ];
 
-      let i = 0;
-      for (i; i < this.survey.assessments.length; i++) {
-          if (this.survey.assessments[i].asessmentType.toString() === '5') {
-              this.createRadioGroup(i);
-              this.createSelect(i);
-          } else {
-              this.createText(i);
+      for (let i = 0; i < this.survey.assessments.length; i++) {
+          this.removeField(i);
+          let required = this.survey.assessments[i].assessmentRequired;
+          switch (this.survey.assessments[i].assessmentDisplayType) {
+              case 'Radio':
+                  this.createRadioGroup(i, required);
+                  break;
+              case 'SelectMany':
+                  this.createSelectMany(i, required);
+                  break;
+              case 'SelectOne':
+                  this.createSelect(i, required);
+                  break;
+              case 'Text':
+                  this.createText(i, required);
+                  break;
+              case 'Number':
+                  this.createNumber(i, required);
+                  break;
+              default:
+                  console.log("Invalid Type");
           }
       }
   }
@@ -112,93 +129,120 @@ export class FormComponent implements OnInit, OnDestroy {
      * This funtion is used to create a SelectField
      * @param i Is used to determine which assessment has been inputed
      */
-    public createSelect(i: number) {
+    public createSelect(i: number, optional) {
 
+        let options = this.createOptions(i);
+        let validate = this.checkValidation(optional);
+        let tempField: SelectField;
+
+        // Check if field already exists
+        if (this.fieldCheck(i, 'SELECT')) {
+            this.removeField(i);
+        }
         // Push new select into the fields array
-        const tempField = new SelectField({
-            key: this.survey.assessments[i].id.toString(),
-            label: this.survey.assessments[i].assessmentDesc,
-            searchable: true,
-            options: this.survey.assessments[i].choices,
+        tempField = new SelectField({
+            key: this.survey.assessments[i].assessmentId.toString(),
+            label: this.survey.assessments[i].assessmentDescription,
+            searchable: false,
+            options: options,
             addNewOption: true,
             addNewOptionText: 'id',
             optionLabelKey: 'choiceDesc',
             validators: [
-                Validators.required,
+                validate,
                 Validators.minLength(1)
-            ]
+            ],
         });
-
-        // Push
-        this.fields.push(tempField);
+        const delta = Number(this.survey.assessments[i].assessmentDelta);
+        this.orderField(delta, tempField);
     }
 
     /**
      * This funtion is used to create a SelectField
      * @param i Is used to determine which assessment has been inputed
      */
-    public createSelectMany(i: number) {
+    public createSelectMany(i: number, optional: string) {
 
+        let options = this.createOptions(i);
+        let validate = this.checkValidation(optional);
+        let tempField: SelectField;
+
+        // Check if field already exists
+        if (this.fieldCheck(i, 'SELECT')) {
+            this.removeField(i);
+        }
         // Push new select into the fields array
-        const tempField = new SelectField({
-            key: this.survey.assessments[i].id.toString(),
-            label: this.survey.assessments[i].assessmentDesc,
+        tempField = new SelectField({
+            key: this.survey.assessments[i].assessmentId.toString(),
+            label: this.survey.assessments[i].assessmentDescription,
             searchable: true,
-            options: this.survey.assessments[i].choices,
+            options: options,
             addNewOption: true,
             addNewOptionText: 'id',
             optionLabelKey: 'choiceDesc',
             multiple: true,
             validators: [
-                Validators.required,
+                validate,
                 Validators.minLength(1)
             ]
         });
-
-        // Push
-        this.fields.push(tempField);
+        const delta = Number(this.survey.assessments[i].assessmentDelta);
+        this.orderField(delta, tempField);
     }
 
     /**
      * This funtion is used to create a RadioGroup
      * @param i Is used to determine which assessment has been inputed
      */
-    public createRadioGroup(i: number) {
+    public createRadioGroup(i: number, optional: string) {
 
+        let options = this.createOptions(i);
+        let validate = this.checkValidation(optional);
+        let tempField: RadioGroupField;
+
+        // Check if field already exists
+        if (this.fieldCheck(i, 'RADIOGROUP')) {
+            return;
+        }
         // Push new radio group into the fields array
-        const tempField = new RadioGroupField({
-            key: this.survey.assessments[i].id.toString(),
-            label: this.survey.assessments[i].assessmentDesc,
-            options: of(this.survey.assessments[i].choices).pipe(delay(10)),
+        tempField = new RadioGroupField({
+            key: this.survey.assessments[i].assessmentId.toString(),
+            label: this.survey.assessments[i].assessmentDescription,
+            options: of(options).pipe(delay(10)),
             optionValueKey: 'id',
             optionLabelKey: 'choiceDesc',
             validators: [
-                Validators.required
+                validate,
+                Validators.minLength(1)
             ]
         });
-
-        // Push
-        this.fields.push(tempField);
+        const delta = Number(this.survey.assessments[i].assessmentDelta);
+        this.orderField(delta, tempField);
     }
 
     /**
      * Used to create a TextField
      * @param i Is used to determine which assessment has been inputed
      */
-    public createText(i: number) {
+    public createText(i: number, optional: string) {
 
+        let tempField: TextField;
+        let validate = this.checkValidation(optional);
+        // Check if field already exists
+        if (this.fieldCheck(i, 'TEXT')) {
+            return;
+        }
         // Push new text field into the fields array
-        const tempField = new TextField({
-            key: this.survey.assessments[i].id,
-            label: this.survey.assessments[i].assessmentDesc,
+        tempField = new TextField({
+            key: this.survey.assessments[i].assessmentId,
+            label: this.survey.assessments[i].assessmentDescription,
             validators: [
-                Validators.required,
+                validate,
                 Validators.minLength(1)
             ]
         });
-
-        // Push
-        this.fields.push(tempField);
+        const delta = Number(this.survey.assessments[i].assessmentDelta);
+        this.orderField(delta, tempField);
 
     }
 
@@ -206,41 +250,111 @@ export class FormComponent implements OnInit, OnDestroy {
      * Used to create a NumberField
      * @param i Is used to determine which assessment has been inputed
      */
-    public createNumber(i: number): void {
+    public createNumber(i: number, optional: string): void {
 
+        let tempField: NumberField;
+        let validate = this.checkValidation(optional);
+        // Check if field already exists
+        if (this.fieldCheck(i, 'NUMBER')) {
+            return;
+        }
         // Push new number field into the fields array
-        const tempField = new NumberField({
-            key: this.survey.assessments[i].id,
-            label: this.survey.assessments[i].assessmentDesc + ' (Number)',
+        tempField = new NumberField({
+            key: this.survey.assessments[i].assessmentId,
+            label: this.survey.assessments[i].assessmentDescription,
             validators: [
-                Validators.required,
+                validate,
                 Validators.minLength(1)
             ]
         });
-
-        // Push
-        this.fields.push(tempField);
-
+        const delta = Number(this.survey.assessments[i].assessmentDelta);
+        this.orderField(delta, tempField);
     }
 
     /**
-     * Used to create a TextField
-     * @param i Is used to determine which assessment has been inputed
+     * This function will return a boolean whether or not an element already exists in the array
+     * @param i
+     * i is the index of the array which will be checked
+     * @param fieldType
      */
-    public createCheckBox(i: number) {
+    public fieldCheck(i: number, fieldType: string): boolean {
+        let j = 0;
+        let validator;
+        validator = this.checkValidation(this.survey.assessments[i].assessmentRequired);
+        for (j; j < this.fields.length; j++) {
+            if (this.fields[j].key === this.survey.assessments[i].assessmentId && fieldType === this.fields[j].controlType
+                && this.fields[j].validators[0] === validator) {
+                return true;
+            } else if (this.fields[j].key === this.survey.assessments[i].assessmentId) {
+                this.removeField(j);
+                return false;
+            }
+        }
+        return false;
+    }
 
-        // Push new text field into the fields array
-        const tempField = new CheckboxField({
-            key: this.survey.assessments[i].id,
-            label: this.survey.assessments[i].assessmentDesc,
+    /**
+     * This function will remove a specified element in the fields array
+     * @param i
+     * i is the index of the array which will be removed
+     */
+    public removeField(i: number) {
+        this.fields.splice(i, 1);
+    }
+
+    /**
+     * This function is used to order the position of a newly added field
+     * @param i
+     * i is the index of the array which will be added
+     */
+    public orderField(i: number, field: any) {
+        this.fields.splice(i, 0, field);
+    }
+
+    public createOptions(i: number): any[] {
+        let options = [];
+        this.survey.assessments[i].assessmentChoices.forEach(element => {
+            options.push((element.choiceId, element.choiceDescription));
         });
-
-        // Push
-        this.fields.push(tempField);
+        return options;
     }
 
   public onSubmit(values: object) {
     this.model = values;
-    console.log(this.model);
+    const payload = JSON.stringify(this.model);
+    this.submitForm(payload);
   }
+
+  public submitForm(payload: string) {
+      this.surveyService
+          .submitSurvey(payload) // Add the survey
+          .subscribe(
+              res => {
+                  console.log(res);
+              }
+          );
+  }
+
+    public checkValidation(optional: string) {
+        let validate;
+        if(optional === '0') {
+            validate = Validators.minLength(1);
+        } else {
+            validate = Validators.required;
+        }
+        return validate;
+    }
+
+    /**
+     * Determines if positions are equal to each other
+     * @param x start position
+     * @param y new position
+     */
+    public checkPos(x: number, y: number) : number {
+        if(x === y) {
+            return x;
+        } else {
+            return y;
+        }
+    }
 }

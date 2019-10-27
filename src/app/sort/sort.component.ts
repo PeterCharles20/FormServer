@@ -4,7 +4,6 @@ import {Survey} from '../Survey';
 import {Assessment} from '../Assessment';
 import {Choice} from '../Choice';
 import {HttpClient} from '@angular/common/http';
-// import {ActivatedRoute} from '@angular/router';
 import {SurveyService} from '../_services/survey.service';
 import {ActivatedRoute} from '@angular/router';
 
@@ -13,6 +12,9 @@ import {ActivatedRoute} from '@angular/router';
   templateUrl: './sort.component.html',
   styleUrls: ['./sort.component.css'],
 })
+/**
+ * @author Peter Charles Sims
+ */
 export class SortComponent implements OnInit {
 
     /**
@@ -30,6 +32,8 @@ export class SortComponent implements OnInit {
 
     private tabTitle: string;
 
+    private str: any;
+
   constructor(
       private http: HttpClient,
       private route: ActivatedRoute,
@@ -37,7 +41,9 @@ export class SortComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-      this.getTabView();
+    // this.createSurvey(); // Create an instance of a survey
+    console.log(this.id);
+    this.getTabView();
   }
 
     /**
@@ -49,7 +55,7 @@ export class SortComponent implements OnInit {
     public getTabView() {
         this.formService.getTabView(this.id)
             .subscribe(
-                data => this.tabViews = data, // Move data into TabView
+                data => this.str = data, // Move data into TabView
                 err => console.log(err), // Log any Errors
                 () => this.sortSurvey()); // Sort tabviews into a Survey
     }
@@ -61,78 +67,15 @@ export class SortComponent implements OnInit {
      * Then it is added into the Survey
      */
     public sortSurvey(): void {
-        this.createSurvey(); // init survey
+        const json = JSON.parse(this.str);
+        eval(json);
+        this.survey = json;
+        this.tabTitle = this.survey.tabViewLabel;
 
-        let tempAssessment: Assessment; // Create a temporary
-        let i = 0; // Iterates through the tab view
-        let j = 0; // Iterates through the assessment choices
-
-        this.tabTitle = this.tabViews[0].tabViewLabel;
-
-        for (i; i < this.tabViews.length; i++) {
-            tempAssessment = this.createAssessment(i); // Create a new assessment
-            if (this.tabViews[i].assessmentType.toString() === '4') {
-                tempAssessment.addChoice(this.createChoice(i, 4)); // Add a single choice to an assessment
-            } else if (this.tabViews[i].assessmentType.toString() === '5') {
-                j = i; // index of the choice
-                while (this.tabViews[j].assessmentId === this.tabViews[i].assessmentId) {
-                    tempAssessment.addChoice(this.createChoice(j, 5)); // Add a single a choice to an assessment
-                    j++;
-                }
-                i = j; // Update new position of i
-            }
-            console.log(tempAssessment);
-            this.survey.addAssessment(tempAssessment); // Add the assessment to the survey
-        }
     }
 
-    /**
-     * Creates a new choice based on the assessment type
-     * @param i
-     * Index of the array
-     * @type
-     * The assessment type
-     */
-    public createChoice(i: number, type: number): Choice {
-        let tempChoices: Choice; // Create temp choice
-        /** Creates a default choice*/
-        if (type === 4) {
-            tempChoices = new Choice(
-                4,
-                'Type 4'
-            );
-            return tempChoices;
-        } else {
-            /** Creates a normal choice*/
-            tempChoices = new Choice(
-                this.tabViews[i].choiceId,
-                this.tabViews[i].choiceLabel
-            );
-        }
-        return tempChoices;
-    }
+    public submitSurvey(payload: string) {
 
-    /**
-     * Creates a new survey
-     */
-    public createSurvey(): void {
-        this.survey = new Survey(
-            this.tabViews[0].tabViewId,
-            this.tabViews[0].tabViewLabel
-        );
-    }
-    /**
-     * Init temp assessment
-     * @param i
-     * Index of the array
-     */
-    public createAssessment(i: number): Assessment {
-        const tempAssessment = new Assessment(
-            this.tabViews[i].assessmentId,
-            this.tabViews[i].assessmentType,
-            this.tabViews[i].assessmentLabel.trim()
-        );
-        return tempAssessment;
     }
 
 }
