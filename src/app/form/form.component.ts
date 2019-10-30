@@ -47,7 +47,7 @@ export class FormComponent implements OnInit, OnDestroy {
   public onchangefn = new Subject<string>();
 
   public fields: DynamicField[];
-  public horizontal = false;
+  public horizontal = true;
   public labelWidth = 1000;
   public model: any;
   public outputhelper = {A: 1, B: 2, C: 3};

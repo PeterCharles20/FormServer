@@ -4,7 +4,7 @@ import {RouterModule, Routes} from '@angular/router';
 import {SortComponent} from './sort/sort.component';
 
 const routes: Routes = [
-    { path: '', redirectTo: '/form/:id', pathMatch: 'full' },
+    { path: '', redirectTo: 'form/:id', pathMatch: 'full' },
     { path: 'form/:id', component: SortComponent },
 ];
 
