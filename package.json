@@ -23,7 +23,7 @@
     "@ng-select/ng-select": "^2.3.5",
     "bootstrap": "^3.4.1",
     "core-js": "^2.5.4",
-    "mathjs": "^3.20.2",
+    "mathjs": "^7.5.1",
     "ngx-bootstrap": "^3.0.1",
     "react-bootstrap": "^1.0.0-beta.11",
     "rxjs": "~6.3.3",
